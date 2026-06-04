@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta name="theme-color" content="#2D5A27">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAEfklEQVR4nO3dQU4dQQxF0SbKXhgxh62wAdaUFSXLyqCkr1YIJPxXtp/d98wj8V0XVysNycPT6+MB3Otb9ReA3ggIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICguR79Rfg4tePn1/9I89vLxFfSS8P1/zFwjty+R8XTOpCAQVF85GLxDQ8oORoPjI4ppkBmXTz3rySpgVkm87ZpIzmBNQinbMZGU0IqF06Z90z6h1Q63TO+mbUNaAx6Zx1zKhfQCPTOeuVUaeAxqdz1iWjNi9TL1XP0efz9gioyzT3avGp3a+wFkOM5nydWW8g6lmc5+AbkPPU8tlOw/EKsx2WA7frzG4DUc/n3ObjFZDbdDxZTckoIKu5mPOZlUtAPhPpwmRiFgGZzKIdh7nVB+Qwhb7Kp1ccUPnnH6B2hpUBUc8uhZOsv8LQWllArJ+9quZZExD1RCiZakFA1BMnf7Y8A0GSHRDrJ1ryhFMDop4cmXPOC4h6MqVNm2cgSJICYv3ky5k5GwiSjIBYP1USJs8GgiQ8INZPrej5s4EgiQ2I9eMg9BTYQJAEBsT68RF3FmwgSKICYv24CToRNhAkIQGxfjxFnAsbCBICgmR/QNxfzrafTvv/8tLtX+y6Q+tvOa4wSAgIks0Btd7GF7H3jNhAkBAQJAQEyc6AeADqYuNJsYEgISBICAiS9q8y/qn8yWzAy5ZPsIEg2RZQ+Tc6vmTXebGBIJn/DDT7EaQcGwgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgmf8urPzHBGa/jGMDQUJAkGwLaPainmfXec1/BqLsUFxhkBAQJAQECQFBsjMgHle72HhSbCBICAgSAoJkc0A8Bvnbe0ZsIEgICJL578L4eaBQ+zfQ7Hl1t/10uMIgISBIQp6Bnt9eyp88brhSbyJGwQaCJCogvu/dBJ0IGwiSwIBYQj7izoINBElsQCwhB6Gn0P5Vhs/fF1xT+BXGEqoVPX+egSDJCIglVCVh8mwgSJICYgnly5k5GwiSvIBYQpnSpp26gWgoR+acs68wGoqWPGGegSApCIglFCd/tjUbiIYilEy17Aqjob2q5skzECSVAbGEdimcZPEGoiFd7QzrrzAaUpRPrz6gw2AKTTnMzSKgw2MWvZhMzCWgw2YiLfjMyiigw2kuzqym5BXQYTYdQ27zeXh6faz+Gv6O39f5g1s6i90GuvGcVxXbafgGdBhPLZnzHHyvsLPLXmfO6SzWG+jGf44RWnzqHgEdTaa5UZfP2+MKOxt/nXVJZ+kX0DIyo17pLF0DWsZk1DGdpXdAS+uM+qazTAhoaZdR93SWOQEtLTKakc4yLaDFNqNJ6SwzA7oxKWleNzfDAzpLjmlwNGcXCugsKKaLRHN20YDeuyOpC+byHgFB0uZlKjwRECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkvwFbCSZmxoXYFgAAAABJRU5ErkJggg==">
+<meta name="mobile-web-app-capable" content="yes">
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Inline service worker for offline support
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kassenbuch">
+<title>Kassenbuch Ergopraxis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root {
+  --bg: #F5F3EE;
+  --bg2: #EDEAE2;
+  --bg3: #E4E0D6;
+  --surface: #FFFFFF;
+  --border: #D8D3C8;
+  --border2: #C8C2B4;
+  --text: #1A1714;
+  --text2: #6B6459;
+  --text3: #9C9085;
+  --accent: #2D5A27;
+  --accent-light: #EBF2EA;
+  --accent-text: #1E3D1A;
+  --warn: #8B4513;
+  --warn-light: #FDF0E8;
+  --warn-text: #5C2D0A;
+  --red: #B83232;
+  --red-light: #FDEAEA;
+  --blue: #1B4F8A;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* HEADER */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px 12px;
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.app-logo { display: flex; align-items: center; gap: 10px; }
+.app-logo-icon {
+  width: 34px; height: 34px; background: var(--accent);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 16px;
+}
+.app-logo-text { font-size: 15px; font-weight: 600; color: var(--text); }
+.app-logo-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+.sync-btn {
+  background: none; border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px;
+  font-size: 12px; color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+.sync-btn:hover { background: var(--bg2); }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); }
+.sync-dot.online { background: var(--accent); }
+.sync-dot.error { background: var(--red); }
+
+/* NAV */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+}
+.nav-btn {
+  flex: 1; padding: 10px 4px 8px;
+  background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text3); font-size: 10px; font-weight: 500;
+  transition: color 0.15s;
+}
+.nav-btn i { font-size: 22px; }
+.nav-btn.active { color: var(--accent); }
+
+/* MAIN */
+.main { padding: 16px 16px 90px; max-width: 480px; margin: 0 auto; }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* STATUS */
+.status-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: var(--radius);
+  font-size: 12px; margin-bottom: 14px;
+  font-family: 'DM Mono', monospace;
+}
+.status-pill.ok { background: var(--accent-light); color: var(--accent-text); }
+.status-pill.err { background: var(--red-light); color: var(--red); }
+.status-pill.loading { background: var(--bg2); color: var(--text3); }
+
+/* UPLOAD ZONE */
+.upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface);
+  margin-bottom: 14px;
+  transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+.upload-zone:active { background: var(--bg2); border-color: var(--accent); }
+.upload-zone-icon { font-size: 36px; color: var(--text3); margin-bottom: 8px; display: block; }
+.upload-zone-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.upload-zone-sub { font-size: 13px; color: var(--text3); }
+#file-input { display: none; }
+
+/* PAGES STRIP */
+.pages-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.page-thumb {
+  position: relative; width: 68px; height: 85px;
+  border-radius: var(--radius); border: 1px solid var(--border);
+  overflow: hidden; flex-shrink: 0; background: var(--bg2);
+  box-shadow: var(--shadow);
+}
+.page-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.page-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(26,23,20,0.65); color: #fff;
+  font-size: 10px; text-align: center; padding: 3px;
+  font-family: 'DM Mono', monospace;
+}
+.page-del {
+  position: absolute; top: 3px; right: 3px;
+  background: rgba(26,23,20,0.6); border: none; border-radius: 50%;
+  width: 20px; height: 20px; color: #fff; cursor: pointer;
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
+}
+.add-page-btn {
+  width: 68px; height: 85px; border-radius: var(--radius);
+  border: 2px dashed var(--border2); background: var(--bg2);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; cursor: pointer; color: var(--text3);
+  font-size: 11px; gap: 4px; flex-shrink: 0;
+}
+.add-page-btn i { font-size: 22px; }
+.pages-meta { font-size: 12px; color: var(--text3); margin-bottom: 10px; font-family: 'DM Mono', monospace; }
+
+/* PROGRESS */
+.progress-wrap { margin-bottom: 14px; display: none; }
+.progress-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; font-family: 'DM Mono', monospace; }
+.progress-track { height: 3px; background: var(--bg3); border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.35s ease; }
+
+/* FORM CARD */
+.form-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px;
+  margin-bottom: 14px; display: none;
+  box-shadow: var(--shadow-md);
+}
+.form-card-title {
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+.field { margin-bottom: 12px; }
+.field label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500; color: var(--text3);
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+  font-family: 'DM Mono', monospace;
+}
+.field input, .field select {
+  width: 100%; padding: 9px 11px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  background: var(--bg); color: var(--text);
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus {
+  outline: none; border-color: var(--accent);
+  background: var(--surface);
+}
+
+/* BADGE */
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; padding: 2px 6px; border-radius: 5px;
+  font-family: 'DM Mono', monospace; font-weight: 400;
+}
+.badge-ok { background: var(--accent-light); color: var(--accent-text); }
+.badge-warn { background: var(--warn-light); color: var(--warn-text); }
+
+.amount-warning {
+  font-size: 12px; color: var(--warn);
+  margin-top: 5px; display: none; align-items: center; gap: 5px;
+  background: var(--warn-light); padding: 6px 10px; border-radius: var(--radius);
+}
+
+/* FILENAME */
+.filename-row {
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 8px 12px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.filename-row i { color: var(--red); font-size: 16px; flex-shrink: 0; }
+.filename-text { font-size: 11px; color: var(--text2); word-break: break-all; font-family: 'DM Mono', monospace; }
+
+/* BUTTONS */
+.btn {
+  width: 100%; padding: 12px;
+  border: none; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  transition: all 0.15s; margin-bottom: 8px;
+}
+.btn:last-child { margin-bottom: 0; }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(45,90,39,0.25); }
+.btn-primary:active { opacity: 0.85; }
+.btn-outline { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-outline:active { background: var(--bg2); }
+.btn-ghost { background: none; color: var(--text3); border: 1px solid var(--border); }
+.btn-ghost:active { background: var(--bg2); }
+
+.tip-row {
+  background: #EBF0F8; border-radius: var(--radius);
+  padding: 9px 12px; font-size: 12px; color: var(--blue);
+  display: flex; gap: 8px; align-items: flex-start; margin-top: 10px;
+}
+.tip-row i { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+/* ENTRY LIST */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-title { font-size: 13px; font-weight: 600; color: var(--text2); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.year-select {
+  padding: 5px 10px; border: 1px solid var(--border);
+  border-radius: var(--radius); font-size: 13px;
+  font-family: 'DM Mono', monospace; background: var(--surface);
+  color: var(--text); cursor: pointer;
+}
+
+.entry-list { display: flex; flex-direction: column; gap: 8px; }
+.entry-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow); transition: all 0.15s;
+}
+.entry-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.entry-body { flex: 1; min-width: 0; }
+.entry-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.entry-meta { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.entry-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.entry-amount { font-size: 14px; font-weight: 600; font-family: 'DM Mono', monospace; }
+.entry-nr { font-size: 10px; color: var(--text3); background: var(--bg2); padding: 2px 6px; border-radius: 5px; font-family: 'DM Mono', monospace; }
+.btn-icon { background: none; border: none; cursor: pointer; color: var(--text3); padding: 4px; font-size: 17px; border-radius: 6px; transition: all 0.15s; }
+.btn-icon:active { background: var(--bg2); color: var(--red); }
+
+/* OVERVIEW */
+.overview-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  margin-bottom: 14px; box-shadow: var(--shadow);
+}
+.overview-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 16px; border-bottom: 1px solid var(--border);
+}
+.overview-row:last-child { border-bottom: none; }
+.ov-left { display: flex; align-items: center; gap: 10px; }
+.ov-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ov-cat { font-size: 13px; color: var(--text); }
+.ov-amount { font-size: 13px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text); }
+.overview-total {
+  background: var(--accent); border-radius: var(--radius-lg);
+  padding: 14px 16px; display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(45,90,39,0.2);
+}
+.overview-total .label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.overview-total .amount { font-size: 20px; font-weight: 600; color: #fff; font-family: 'DM Mono', monospace; }
+
+.export-row { display: flex; gap: 8px; }
+.export-row .btn { flex: 1; margin-bottom: 0; }
+
+/* EMPTY */
+.empty {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--text3);
+}
+.empty i { font-size: 40px; margin-bottom: 12px; display: block; opacity: 0.4; }
+.empty p { font-size: 14px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff;
+  padding: 9px 18px; border-radius: 99px;
+  font-size: 13px; opacity: 0; transition: opacity 0.25s;
+  pointer-events: none; white-space: nowrap; z-index: 999;
+  box-shadow: var(--shadow-md);
+  font-family: 'DM Sans', sans-serif;
+}
+.toast.show { opacity: 1; }
+
+/* SCAN HINT */
+.scan-hint { text-align: center; padding: 1.5rem 0; color: var(--text3); font-size: 13px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="install-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#2D5A27;color:#fff;padding:12px 16px;z-index:200;display:flex;align-items:center;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:13px;">
+  <span><i class="ti ti-download"></i> App auf Startbildschirm installieren</span>
+  <button id="install-btn" style="background:#fff;color:#2D5A27;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Installieren</button>
+  <button onclick="document.getElementById('install-banner').style.display='none'" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">×</button>
+</div>
+<script>
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').style.display = 'flex';
+});
+document.getElementById('install-btn')?.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('install-banner').style.display = 'none';
+  }
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').style.display = 'none';
+});
+</script>
+
+
+<header class="app-header">
+  <div class="app-logo">
+    <div class="app-logo-icon"><i class="ti ti-briefcase-medical"></i></div>
+    <div>
+      <div class="app-logo-text">Kassenbuch</div>
+      <div class="app-logo-sub">Ergotherapie Hilpert</div>
+    </div>
+  </div>
+  <button class="sync-btn" onclick="loadEntries()">
+    <span class="sync-dot" id="sync-dot"></span>
+    <span id="sync-label">Sync</span>
+  </button>
+</header>
+
+<main class="main">
+
+  <!-- SCAN VIEW -->
+  <div id="view-scan" class="view active">
+    <div id="status-pill" class="status-pill loading">
+      <i class="ti ti-loader"></i>
+      <span id="status-text">Verbindung wird geprüft…</span>
+    </div>
+
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <i class="ti ti-camera-plus upload-zone-icon"></i>
+      <div class="upload-zone-title">Beleg fotografieren</div>
+      <div class="upload-zone-sub">Tippen um Kamera zu öffnen<br>Mehrere Seiten möglich</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)">
+
+    <div id="pages-strip" class="pages-strip" style="display:none"></div>
+    <div id="pages-meta" class="pages-meta" style="display:none"></div>
+
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-label" id="progress-label">KI analysiert…</div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div class="form-card" id="form-card">
+      <div class="form-card-title"><i class="ti ti-sparkles"></i> Erkannte Rechnungsdaten</div>
+
+      <div class="field">
+        <label>Rechnungsdatum <span id="conf-datum"></span></label>
+        <input type="date" id="f-datum" onchange="updateFilename()">
+      </div>
+      <div class="field">
+        <label>Rechnungssteller <span id="conf-steller"></span></label>
+        <input type="text" id="f-steller" placeholder="Absender der Rechnung" oninput="updateFilename()">
+      </div>
+      <div class="field">
+        <label>Beschreibung <span id="conf-beschr"></span></label>
+        <input type="text" id="f-beschreibung" placeholder="Erbrachte Dienstleistung" oninput="updateFilename()">
+      </div>
+      <div class="field">
+        <label>Kategorie</label>
+        <select id="f-kategorie">
+          <option value="Praxis & Infrastruktur">Praxis &amp; Infrastruktur</option>
+          <option value="Software & Kommunikation">Software &amp; Kommunikation</option>
+          <option value="Material & Verbrauch">Material &amp; Verbrauch</option>
+          <option value="Versicherungen">Versicherungen</option>
+          <option value="Weiterbildung & Fachliteratur">Weiterbildung &amp; Fachliteratur</option>
+          <option value="Verbände & Gebühren">Verbände &amp; Gebühren</option>
+          <option value="Fahrkosten">Fahrkosten</option>
+          <option value="Sonstiger Geschäftsaufwand">Sonstiger Geschäftsaufwand</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Betrag CHF <span id="conf-betrag"></span></label>
+        <input type="number" id="f-betrag" step="0.05" min="0" placeholder="0.00">
+        <div class="amount-warning" id="amount-warning">
+          <i class="ti ti-alert-triangle"></i>
+          Betrag unsicher — bitte auf Beleg prüfen (Zeile "Total" / "Zu bezahlen")
+        </div>
+      </div>
+      <div class="field">
+        <label>Bemerkungen</label>
+        <input type="text" id="f-bemerkungen" placeholder="Optional">
+      </div>
+
+      <div class="filename-row">
+        <i class="ti ti-file-type-pdf"></i>
+        <span class="filename-text" id="filename-display">—</span>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveAndShare()">
+        <i class="ti ti-cloud-upload"></i> In Supabase speichern &amp; PDF teilen
+      </button>
+      <button class="btn btn-outline" onclick="saveOnly()">
+        <i class="ti ti-device-floppy"></i> Nur speichern (kein PDF)
+      </button>
+      <button class="btn btn-ghost" onclick="resetScan()">Abbrechen</button>
+
+      <div class="tip-row">
+        <i class="ti ti-brand-onedrive"></i>
+        <span>PDF im Teilen-Dialog → OneDrive → <strong>Buchhaltung/2026</strong> wählen</span>
+      </div>
+    </div>
+
+    <div id="scan-hint" class="scan-hint">
+      Fotografiere jede Rechnungsseite einzeln.<br>
+      Einträge werden in Supabase gespeichert —<br>von beiden Handys abrufbar.
+    </div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div id="view-list" class="view">
+    <div class="section-header">
+      <span class="section-title">Kassenbuch</span>
+      <select class="year-select" id="year-select" onchange="renderList()"></select>
+    </div>
+    <div id="entry-list" class="entry-list"></div>
+  </div>
+
+  <!-- OVERVIEW VIEW -->
+  <div id="view-overview" class="view">
+    <div class="section-header">
+      <span class="section-title">Jahresübersicht</span>
+      <select class="year-select" id="year-select-2" onchange="renderOverview()"></select>
+    </div>
+    <div id="overview-total"></div>
+    <div id="overview-cats" class="overview-card"></div>
+    <div class="export-row">
+      <button class="btn btn-primary" onclick="exportCSV()">
+        <i class="ti ti-table-export"></i> CSV exportieren
+      </button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn btn-outline" onclick="exportBackup()">
+        <i class="ti ti-database-export"></i> Backup exportieren
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-scan" onclick="switchTab('scan')">
+    <i class="ti ti-camera"></i> Erfassen
+  </button>
+  <button class="nav-btn" id="nav-list" onclick="switchTab('list')">
+    <i class="ti ti-list"></i> Kassenbuch
+  </button>
+  <button class="nav-btn" id="nav-overview" onclick="switchTab('overview')">
+    <i class="ti ti-chart-bar"></i> Übersicht
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── KONFIGURATION ───────────────────────────────────────────────
+const SUPABASE_URL = 'https://zomsdllwwsbhjldtbhpq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvbXNkbGx3d3NiaGpsZHRiaHBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTc5NDIsImV4cCI6MjA5NjA3Mzk0Mn0.ejRZd1bpNP_EGapARgps7r9DUeJzeuK5yW5m_k640b4';
+const GEMINI_KEY = 'AQ.Ab8RN6I8goNOxxBOTYn1peoRlLwtGRMNAg-fg_4obz-aYO4m1A';
+
+const CATS = ['Praxis & Infrastruktur','Software & Kommunikation','Material & Verbrauch','Versicherungen','Weiterbildung & Fachliteratur','Verbände & Gebühren','Fahrkosten','Sonstiger Geschäftsaufwand'];
+const COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#888780','#378ADD','#639922','#BA7517'];
+
+// ─── STATE ───────────────────────────────────────────────────────
+let pages = [];
+let entries = [];
+let currentTab = 'scan';
+
+// ─── SUPABASE ────────────────────────────────────────────────────
+async function sbFetch(path, options = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(options.headers || {})
+    }
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+async function checkConnection() {
+  const pill = document.getElementById('status-pill');
+  const txt = document.getElementById('status-text');
+  const dot = document.getElementById('sync-dot');
+  try {
+    await sbFetch('eintraege?limit=1');
+    pill.className = 'status-pill ok';
+    pill.innerHTML = '<i class="ti ti-cloud-check"></i><span>Verbunden mit Supabase ✓</span>';
+    dot.className = 'sync-dot online';
+    document.getElementById('sync-label').textContent = 'Online';
+    await loadEntries();
+  } catch(e) {
+    pill.className = 'status-pill err';
+    pill.innerHTML = `<i class="ti ti-cloud-off"></i><span>Keine Verbindung: ${e.message}</span>`;
+    dot.className = 'sync-dot error';
+    document.getElementById('sync-label').textContent = 'Offline';
+  }
+}
+
+async function loadEntries() {
+  try {
+    const data = await sbFetch('eintraege?order=beleg_nr.desc');
+    entries = data.map(r => ({
+      id: r.id,
+      belegNr: r.beleg_nr,
+      datum: r.datum,
+      rechnungssteller: r.rechnungssteller,
+      beschreibung: r.beschreibung,
+      kategorie: r.kategorie,
+      betrag: r.betrag,
+      bemerkungen: r.bemerkungen || '',
+      filename: r.filename || ''
+    }));
+    populateYears();
+    if (currentTab === 'list') renderList();
+    if (currentTab === 'overview') renderOverview();
+    document.getElementById('sync-dot').className = 'sync-dot online';
+  } catch(e) {
+    showToast('Ladefehler: ' + e.message);
+  }
+}
+
+async function getNextNr() {
+  try {
+    const data = await sbFetch('eintraege?select=beleg_nr&order=beleg_nr.desc&limit=1');
+    return data.length > 0 ? data[0].beleg_nr + 1 : 1;
+  } catch(e) { return 1; }
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────
+function slugify(s) {
+  return (s || '').trim()
+    .replace(/[äÄ]/g,'ae').replace(/[öÖ]/g,'oe').replace(/[üÜ]/g,'ue')
+    .replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').substring(0,35);
+}
+
+function buildFilename(nr) {
+  const s = slugify(document.getElementById('f-steller').value);
+  const d = slugify(document.getElementById('f-beschreibung').value);
+  const dt = document.getElementById('f-datum').value || today();
+  return `${nr}_${s}_${d}_${dt}.pdf`;
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function updateFilename() {
+  const nr = entries.length > 0 ? Math.max(...entries.map(e => e.belegNr || 0)) + 1 : 1;
+  document.getElementById('filename-display').textContent = buildFilename(nr);
+}
+
+function getYears() {
+  const yrs = [...new Set(entries.map(e => (e.datum||'').substring(0,4)).filter(Boolean))];
+  const cur = new Date().getFullYear().toString();
+  if (!yrs.includes(cur)) yrs.push(cur);
+  return yrs.sort().reverse();
+}
+
+function populateYears() {
+  const years = getYears();
+  ['year-select','year-select-2'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+    if (years.includes(cur)) sel.value = cur;
+  });
+}
+
+function badge(level) {
+  if (level === 'high') return `<span class="badge badge-ok"><i class="ti ti-check"></i> erkannt</span>`;
+  if (level === 'low') return `<span class="badge badge-warn"><i class="ti ti-alert-triangle"></i> unsicher</span>`;
+  return '';
+}
+
+function showToast(msg, duration = 2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ─── TAB NAVIGATION ──────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  if (tab === 'list') { populateYears(); renderList(); }
+  if (tab === 'overview') { populateYears(); renderOverview(); }
+}
+
+// ─── FILE HANDLING ───────────────────────────────────────────────
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pages.push({ dataUrl: ev.target.result, mime: file.type || 'image/jpeg' });
+    renderStrip();
+    if (pages.length === 1) {
+      document.getElementById('scan-hint').style.display = 'none';
+      document.getElementById('upload-zone').style.display = 'none';
+    }
+    analyzeImages();
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderStrip() {
+  const strip = document.getElementById('pages-strip');
+  const meta = document.getElementById('pages-meta');
+  strip.style.display = 'flex'; meta.style.display = 'block';
+  meta.textContent = `${pages.length} Seite${pages.length > 1 ? 'n' : ''} — weitere hinzufügen:`;
+  strip.innerHTML = pages.map((p,i) => `
+    <div class="page-thumb">
+      <img src="${p.dataUrl}" alt="Seite ${i+1}">
+      <div class="page-label">S. ${i+1}</div>
+      <button class="page-del" onclick="removePage(${i})"><i class="ti ti-x"></i></button>
+    </div>
+  `).join('') + `<div class="add-page-btn" onclick="document.getElementById('file-input').click()"><i class="ti ti-plus"></i><span>Seite</span></div>`;
+}
+
+function removePage(i) {
+  pages.splice(i, 1);
+  if (!pages.length) { resetScan(); return; }
+  renderStrip(); analyzeImages();
+}
+
+// ─── KI ANALYSE ──────────────────────────────────────────────────
+async function analyzeImages() {
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('form-card').style.display = 'none';
+  animateProgress();
+
+  const prompt = `Du bist ein präziser Schweizer Buchhaltungsassistent für eine selbstständige Ergotherapeutin. Analysiere diese Rechnung (${pages.length} Seite${pages.length > 1 ? 'n' : ''}).
+
+WICHTIGE HINWEISE:
+- datum: Das RECHNUNGSDATUM (ausgestellt am). Format YYYY-MM-DD. Falls unklar: "${today()}".
+- rechnungssteller: ABSENDER/LIEFERANT (oben links: Firmenname). NICHT der Empfänger.
+- beschreibung: Konkrete Dienstleistung/Produkt. Kurz, präzise (max. 60 Zeichen).
+- betrag: TOTALBETRAG inkl. MwSt (Zeile "Total", "Rechnungsbetrag", "Zu bezahlen"). Nur Zahl.
+- betrag_konfidenz: "high" wenn Total eindeutig erkennbar, sonst "low".
+- datum_konfidenz: "high" wenn Rechnungsdatum klar, sonst "low".
+- steller_konfidenz: "high" wenn Absender klar, sonst "low".
+- beschreibung_konfidenz: "high" wenn Leistung klar, sonst "low".
+- kategorie: Passendste aus: ${CATS.join(', ')}.
+
+Antworte NUR mit JSON (kein Markdown, keine Erklärung):
+{"datum":"","datum_konfidenz":"","rechnungssteller":"","steller_konfidenz":"","beschreibung":"","beschreibung_konfidenz":"","betrag":0,"betrag_konfidenz":"","bemerkungen":"","kategorie":""}`;
+
+  const imageParts = pages.map(p => ({
+    inlineData: { mimeType: p.mime, data: p.dataUrl.split(',')[1] }
+  }));
+
+  try {
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [...imageParts, { text: prompt }] }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+        })
+      }
+    );
+    const data = await resp.json();
+    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    fillForm(JSON.parse(txt.replace(/```json|```/g,'').trim()));
+  } catch(e) {
+    fillForm({ datum: today(), datum_konfidenz:'low', rechnungssteller:'', steller_konfidenz:'low', beschreibung:'', beschreibung_konfidenz:'low', betrag:0, betrag_konfidenz:'low', bemerkungen:'', kategorie:'Sonstiger Geschäftsaufwand' });
+    showToast('KI-Fehler — Felder manuell ausfüllen');
+  }
+
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('form-card').style.display = 'block';
+  updateFilename();
+}
+
+function fillForm(d) {
+  document.getElementById('f-datum').value = d.datum || '';
+  document.getElementById('f-steller').value = d.rechnungssteller || '';
+  document.getElementById('f-beschreibung').value = d.beschreibung || '';
+  document.getElementById('f-betrag').value = d.betrag || '';
+  document.getElementById('f-bemerkungen').value = d.bemerkungen || '';
+  document.getElementById('conf-datum').innerHTML = badge(d.datum_konfidenz);
+  document.getElementById('conf-steller').innerHTML = badge(d.steller_konfidenz);
+  document.getElementById('conf-beschr').innerHTML = badge(d.beschreibung_konfidenz);
+  document.getElementById('conf-betrag').innerHTML = badge(d.betrag_konfidenz);
+  document.getElementById('amount-warning').style.display = d.betrag_konfidenz === 'low' ? 'flex' : 'none';
+  const sel = document.getElementById('f-kategorie');
+  const match = CATS.find(c => c === d.kategorie);
+  if (match) sel.value = match;
+}
+
+function animateProgress() {
+  const fill = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  const steps = ['Absender erkennen…','Rechnungsdatum suchen…','Betrag prüfen…','Kategorie zuweisen…'];
+  let pct = 0, ti = 0;
+  const iv = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 12, 90);
+    fill.style.width = pct + '%';
+    if (ti < steps.length) label.textContent = steps[ti++];
+    if (pct >= 90) clearInterval(iv);
+  }, 500);
+}
+
+// ─── PDF ─────────────────────────────────────────────────────────
+async function buildPdf() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  for (let i = 0; i < pages.length; i++) {
+    if (i > 0) pdf.addPage();
+    const img = new Image();
+    await new Promise(res => { img.onload = res; img.src = pages[i].dataUrl; });
+    const r = img.naturalWidth / img.naturalHeight;
+    let iw = 210, ih = 210 / r;
+    if (ih > 297) { ih = 297; iw = 297 * r; }
+    pdf.addImage(pages[i].dataUrl, pages[i].mime === 'image/png' ? 'PNG' : 'JPEG', (210-iw)/2, (297-ih)/2, iw, ih);
+  }
+  return pdf;
+}
+
+// ─── SAVE ────────────────────────────────────────────────────────
+function getFormData() {
+  return {
+    datum: document.getElementById('f-datum').value,
+    steller: document.getElementById('f-steller').value.trim(),
+    beschreibung: document.getElementById('f-beschreibung').value.trim(),
+    kategorie: document.getElementById('f-kategorie').value,
+    betrag: parseFloat(document.getElementById('f-betrag').value),
+    bemerkungen: document.getElementById('f-bemerkungen').value.trim()
+  };
+}
+
+async function saveAndShare() {
+  const d = getFormData();
+  if (!d.datum || !d.steller || !d.beschreibung || isNaN(d.betrag) || d.betrag <= 0) {
+    showToast('Bitte alle Pflichtfelder ausfüllen'); return;
+  }
+  showToast('Wird gespeichert…');
+  try {
+    const nr = await getNextNr();
+    const filename = buildFilename(nr);
+    await sbFetch('eintraege', {
+      method: 'POST',
+      body: JSON.stringify({ beleg_nr: nr, datum: d.datum, rechnungssteller: d.steller, beschreibung: d.beschreibung, kategorie: d.kategorie, betrag: Math.round(d.betrag*100)/100, bemerkungen: d.bemerkungen, filename })
+    });
+
+    if (pages.length > 0) {
+      const pdf = await buildPdf();
+      const blob = pdf.output('blob');
+      const file = new File([blob], filename, { type: 'application/pdf' });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+        showToast('PDF heruntergeladen — in OneDrive verschieben');
+      }
+    }
+
+    showToast('✓ Gespeichert!');
+    await loadEntries();
+    setTimeout(resetScan, 1600);
+  } catch(e) {
+    showToast('Fehler: ' + e.message);
+  }
+}
+
+async function saveOnly() {
+  const d = getFormData();
+  if (!d.datum || !d.steller || !d.beschreibung || isNaN(d.betrag) || d.betrag <= 0) {
+    showToast('Bitte alle Pflichtfelder ausfüllen'); return;
+  }
+  try {
+    const nr = await getNextNr();
+    const filename = buildFilename(nr);
+    await sbFetch('eintraege', {
+      method: 'POST',
+      body: JSON.stringify({ beleg_nr: nr, datum: d.datum, rechnungssteller: d.steller, beschreibung: d.beschreibung, kategorie: d.kategorie, betrag: Math.round(d.betrag*100)/100, bemerkungen: d.bemerkungen, filename })
+    });
+    showToast('✓ Gespeichert!');
+    await loadEntries();
+    resetScan();
+  } catch(e) { showToast('Fehler: ' + e.message); }
+}
+
+function resetScan() {
+  pages = [];
+  ['pages-strip','progress-wrap','form-card'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('pages-strip').innerHTML = '';
+  document.getElementById('pages-meta').style.display = 'none';
+  document.getElementById('upload-zone').style.display = 'block';
+  document.getElementById('scan-hint').style.display = 'block';
+  document.getElementById('file-input').value = '';
+  document.getElementById('filename-display').textContent = '—';
+}
+
+// ─── LIST ────────────────────────────────────────────────────────
+async function deleteEntry(id) {
+  if (!confirm('Eintrag wirklich löschen?')) return;
+  try {
+    await sbFetch(`eintraege?id=eq.${id}`, { method: 'DELETE' });
+    showToast('Gelöscht');
+    await loadEntries();
+  } catch(e) { showToast('Fehler beim Löschen'); }
+}
+
+function renderList() {
+  const year = document.getElementById('year-select').value;
+  const filtered = entries.filter(e => e.datum && e.datum.startsWith(year));
+  const list = document.getElementById('entry-list');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty"><i class="ti ti-inbox"></i><p>Noch keine Einträge für ${year}</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(e => {
+    const ci = CATS.indexOf(e.kategorie);
+    const color = COLORS[ci >= 0 ? ci : 0];
+    return `<div class="entry-card">
+      <div class="entry-dot" style="background:${color}"></div>
+      <div class="entry-body">
+        <div class="entry-name">${e.rechnungssteller}</div>
+        <div class="entry-meta">${e.datum} · ${e.kategorie}</div>
+      </div>
+      <div class="entry-right">
+        <div class="entry-nr">#${e.belegNr}</div>
+        <div class="entry-amount">CHF ${Number(e.betrag).toFixed(2)}</div>
+        <button class="btn-icon" onclick="deleteEntry(${e.id})"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── OVERVIEW ────────────────────────────────────────────────────
+function renderOverview() {
+  const year = document.getElementById('year-select-2').value;
+  const filtered = entries.filter(e => e.datum && e.datum.startsWith(year));
+  const totalEl = document.getElementById('overview-total');
+  const catsEl = document.getElementById('overview-cats');
+
+  if (!filtered.length) {
+    totalEl.innerHTML = '';
+    catsEl.innerHTML = `<div class="empty"><i class="ti ti-chart-bar"></i><p>Noch keine Einträge für ${year}</p></div>`;
+    return;
+  }
+
+  const totals = {};
+  CATS.forEach(c => totals[c] = 0);
+  filtered.forEach(e => { if (totals[e.kategorie] !== undefined) totals[e.kategorie] += Number(e.betrag); });
+  const total = Object.values(totals).reduce((a,b) => a+b, 0);
+
+  totalEl.innerHTML = `<div class="overview-total">
+    <div><div class="label">Total Ausgaben ${year}</div><div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px">${filtered.length} Belege</div></div>
+    <div class="amount">CHF ${total.toFixed(2)}</div>
+  </div>`;
+
+  catsEl.innerHTML = CATS.filter(c => totals[c] > 0).map(c => {
+    const color = COLORS[CATS.indexOf(c)];
+    const pct = ((totals[c] / total) * 100).toFixed(0);
+    return `<div class="overview-row">
+      <div class="ov-left"><div class="ov-dot" style="background:${color}"></div><div class="ov-cat">${c}</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${pct}%</div>
+        <div class="ov-amount">CHF ${totals[c].toFixed(2)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── EXPORT ──────────────────────────────────────────────────────
+function exportCSV() {
+  const year = document.getElementById('year-select-2').value;
+  const filtered = entries.filter(e => e.datum && e.datum.startsWith(year)).slice().reverse();
+  if (!filtered.length) { showToast('Keine Einträge'); return; }
+  const hdr = 'Beleg-Nr.;Datum;Rechnungssteller;Beschreibung;Kategorie;Betrag (CHF);Bemerkungen;Dateiname';
+  const rows = filtered.map(e => [e.belegNr, e.datum, e.rechnungssteller, e.beschreibung, e.kategorie, Number(e.betrag).toFixed(2), e.bemerkungen||'', e.filename||''].join(';'));
+  const csv = '\uFEFF' + [hdr, ...rows].join('\n');
+  download(`Kassenbuch_${year}.csv`, new Blob([csv], { type:'text/csv;charset=utf-8;' }));
+  showToast('CSV exportiert!');
+}
+
+function exportBackup() {
+  const json = JSON.stringify(entries, null, 2);
+  download(`Kassenbuch_Backup_${today()}.json`, new Blob([json], { type:'application/json' }));
+  showToast('Backup exportiert!');
+}
+
+function download(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+checkConnection();
+</script>
+</body>
+</html>
