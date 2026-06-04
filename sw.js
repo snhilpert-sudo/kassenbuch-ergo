@@ -1,5 +1,11 @@
-const CACHE = 'kassenbuch-v1';
-const FILES = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'kassenbuch-v2';
+const FILES = [
+  '/kassenbuch-ergo/',
+  '/kassenbuch-ergo/index.html',
+  '/kassenbuch-ergo/manifest.json',
+  '/kassenbuch-ergo/icon-192.png',
+  '/kassenbuch-ergo/icon-512.png'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
