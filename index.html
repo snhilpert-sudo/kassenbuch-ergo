@@ -2,14 +2,21 @@
 <html lang="de">
 <head>
 <meta name="theme-color" content="#2D5A27">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkthc3NlbmJ1Y2ggRXJnb3ByYXhpcyIsCiAgInNob3J0X25hbWUiOiAiS2Fzc2VuYnVjaCIsCiAgImRlc2NyaXB0aW9uIjogIkthc3NlbmJ1Y2ggZsO8ciBFcmdvdGhlcmFwaWUgSGlscGVydCIsCiAgInN0YXJ0X3VybCI6ICIuL0thc3NlbmJ1Y2hfRXJnb3ByYXhpcy5odG1sIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjVGM0VFIiwKICAidGhlbWVfY29sb3IiOiAiIzJENUEyNyIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaWNvbi0xOTIucG5nIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9LAogICAgewogICAgICAic3JjIjogImljb24tNTEyLnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQo=">
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAEfklEQVR4nO3dQU4dQQxF0SbKXhgxh62wAdaUFSXLyqCkr1YIJPxXtp/d98wj8V0XVysNycPT6+MB3Otb9ReA3ggIEgKChIAgISBICAgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgISBICAgSAoKEgCAhIEgICBICguR79Rfg4tePn1/9I89vLxFfSS8P1/zFwjty+R8XTOpCAQVF85GLxDQ8oORoPjI4ppkBmXTz3rySpgVkm87ZpIzmBNQinbMZGU0IqF06Z90z6h1Q63TO+mbUNaAx6Zx1zKhfQCPTOeuVUaeAxqdz1iWjNi9TL1XP0efz9gioyzT3avGp3a+wFkOM5nydWW8g6lmc5+AbkPPU8tlOw/EKsx2WA7frzG4DUc/n3ObjFZDbdDxZTckoIKu5mPOZlUtAPhPpwmRiFgGZzKIdh7nVB+Qwhb7Kp1ccUPnnH6B2hpUBUc8uhZOsv8LQWllArJ+9quZZExD1RCiZakFA1BMnf7Y8A0GSHRDrJ1ryhFMDop4cmXPOC4h6MqVNm2cgSJICYv3ky5k5GwiSjIBYP1USJs8GgiQ8INZPrej5s4EgiQ2I9eMg9BTYQJAEBsT68RF3FmwgSKICYv24CToRNhAkIQGxfjxFnAsbCBICgmR/QNxfzrafTvv/8tLtX+y6Q+tvOa4wSAgIks0Btd7GF7H3jNhAkBAQJAQEyc6AeADqYuNJsYEgISBICAiS9q8y/qn8yWzAy5ZPsIEg2RZQ+Tc6vmTXebGBIJn/DDT7EaQcGwgSAoKEgCAhIEgICBICgoSAICEgSAgIEgKChIAgmf8urPzHBGa/jGMDQUJAkGwLaPainmfXec1/BqLsUFxhkBAQJAQECQFBsjMgHle72HhSbCBICAgSAoJkc0A8Bvnbe0ZsIEgICJL578L4eaBQ+zfQ7Hl1t/10uMIgISBIQp6Bnt9eyp88brhSbyJGwQaCJCogvu/dBJ0IGwiSwIBYQj7izoINBElsQCwhB6Gn0P5Vhs/fF1xT+BXGEqoVPX+egSDJCIglVCVh8mwgSJICYgnly5k5GwiSvIBYQpnSpp26gWgoR+acs68wGoqWPGGegSApCIglFCd/tjUbiIYilEy17Aqjob2q5skzECSVAbGEdimcZPEGoiFd7QzrrzAaUpRPrz6gw2AKTTnMzSKgw2MWvZhMzCWgw2YiLfjMyiigw2kuzqym5BXQYTYdQ27zeXh6faz+Gv6O39f5g1s6i90GuvGcVxXbafgGdBhPLZnzHHyvsLPLXmfO6SzWG+jGf44RWnzqHgEdTaa5UZfP2+MKOxt/nXVJZ+kX0DIyo17pLF0DWsZk1DGdpXdAS+uM+qazTAhoaZdR93SWOQEtLTKakc4yLaDFNqNJ6SwzA7oxKWleNzfDAzpLjmlwNGcXCugsKKaLRHN20YDeuyOpC+byHgFB0uZlKjwRECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkvwFbCSZmxoXYFgAAAABJRU5ErkJggg==">
 <meta name="mobile-web-app-capable" content="yes">
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Inline service worker for offline support
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    const swCode = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('activate', e => self.clients.claim());
+      self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+    `;
+    const blob = new Blob([swCode], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
   });
 }
 </script>
@@ -345,6 +352,32 @@ body {
 </style>
 </head>
 <body>
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;background:#F5F3EE;z-index:500;flex-direction:column;align-items:center;justify-content:center;padding:2rem;font-family:'DM Sans',sans-serif;">
+  <div style="width:64px;height:64px;background:#2D5A27;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+    <i class="ti ti-briefcase-medical" style="font-size:32px;color:#fff;"></i>
+  </div>
+  <div style="font-size:20px;font-weight:600;color:#1A1714;margin-bottom:4px;">Kassenbuch</div>
+  <div style="font-size:13px;color:#9C9085;margin-bottom:2rem;font-family:monospace;">Ergotherapie Hilpert</div>
+  <div id="login-form" style="width:100%;max-width:320px;">
+    <div style="margin-bottom:12px;">
+      <label style="display:block;font-size:11px;font-weight:500;color:#6B6459;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;">Passwort</label>
+      <input type="password" id="login-password" placeholder="Passwort eingeben"
+        style="width:100%;padding:12px 14px;border:1px solid #D8D3C8;border-radius:10px;font-size:15px;background:#fff;color:#1A1714;outline:none;box-sizing:border-box;"
+        onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+    <div id="login-error" style="display:none;color:#B83232;font-size:12px;margin-bottom:10px;padding:8px 12px;background:#FDEAEA;border-radius:8px;">
+      Falsches Passwort. Bitte nochmals versuchen.
+    </div>
+    <button onclick="doLogin()" style="width:100%;padding:13px;background:#2D5A27;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;">
+      Anmelden
+    </button>
+    <button id="biometric-btn" onclick="doBiometric()" style="display:none;width:100%;padding:13px;background:#fff;color:#2D5A27;border:1.5px solid #2D5A27;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;align-items:center;justify-content:center;gap:8px;">
+      <i class="ti ti-fingerprint" style="font-size:20px;"></i> Mit Fingerabdruck entsperren
+    </button>
+  </div>
+</div>
+
 <div id="install-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#2D5A27;color:#fff;padding:12px 16px;z-index:200;display:flex;align-items:center;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:13px;">
   <span><i class="ti ti-download"></i> App auf Startbildschirm installieren</span>
   <button id="install-btn" style="background:#fff;color:#2D5A27;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Installieren</button>
@@ -970,8 +1003,229 @@ function download(filename, blob) {
   URL.revokeObjectURL(url);
 }
 
-// ─── INIT ────────────────────────────────────────────────────────
-checkConnection();
+
+
+// ─── EDIT ─────────────────────────────────────────────────────────
+let editingId = null;
+
+function openEdit(id) {
+  const entry = entries.find(e => e.id === id);
+  if (!entry) return;
+  editingId = id;
+  document.getElementById('edit-datum').value = entry.datum || '';
+  document.getElementById('edit-steller').value = entry.rechnungssteller || '';
+  document.getElementById('edit-beschreibung').value = entry.beschreibung || '';
+  document.getElementById('edit-betrag').value = entry.betrag || '';
+  document.getElementById('edit-bemerkungen').value = entry.bemerkungen || '';
+  const sel = document.getElementById('edit-kategorie');
+  const match = CATS.find(c => c === entry.kategorie);
+  if (match) sel.value = match;
+  const modal = document.getElementById('edit-modal');
+  modal.style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal').style.display = 'none';
+  editingId = null;
+}
+
+async function saveEdit() {
+  if (!editingId) return;
+  const datum = document.getElementById('edit-datum').value;
+  const steller = document.getElementById('edit-steller').value.trim();
+  const beschreibung = document.getElementById('edit-beschreibung').value.trim();
+  const kategorie = document.getElementById('edit-kategorie').value;
+  const betrag = parseFloat(document.getElementById('edit-betrag').value);
+  const bemerkungen = document.getElementById('edit-bemerkungen').value.trim();
+
+  if (!datum || !steller || !beschreibung || isNaN(betrag) || betrag <= 0) {
+    showToast('Bitte alle Pflichtfelder ausfüllen'); return;
+  }
+
+  try {
+    await sbFetch(`eintraege?id=eq.${editingId}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ datum, rechnungssteller: steller, beschreibung, kategorie, betrag: Math.round(betrag*100)/100, bemerkungen })
+    });
+    showToast('✓ Eintrag aktualisiert');
+    closeEdit();
+    await loadEntries();
+  } catch(e) {
+    showToast('Fehler beim Speichern: ' + e.message);
+  }
+}
+
+// Schliessen beim Tippen ausserhalb des Modals
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEdit();
+});
+
+// ─── AUTH ─────────────────────────────────────────────────────────
+const SESSION_KEY = 'kb_auth_session';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function isLoggedIn() {
+  return sessionStorage.getItem(SESSION_KEY) === 'authenticated';
+}
+
+function setLoggedIn() {
+  sessionStorage.setItem(SESSION_KEY, 'authenticated');
+}
+
+async function doLogin() {
+  const pw = document.getElementById('login-password').value;
+  if (!pw) return;
+  const hash = await sha256(pw);
+  const stored = localStorage.getItem('kb_pw_hash');
+  if (!stored) {
+    localStorage.setItem('kb_pw_hash', hash);
+    setLoggedIn(); showApp(); return;
+  }
+  if (hash === stored) {
+    setLoggedIn(); showApp();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-password').focus();
+  }
+}
+
+function uint8ToBase64(u8) { return btoa(String.fromCharCode(...u8)); }
+function base64ToUint8(b64) { return Uint8Array.from(atob(b64), c => c.charCodeAt(0)); }
+
+async function doBiometric() {
+  try {
+    const credId = localStorage.getItem('kb_cred_id');
+    if (!credId) { await setupBiometric(); return; }
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials: [{ id: base64ToUint8(credId), type: 'public-key' }],
+        userVerification: 'required', timeout: 30000
+      }
+    });
+    if (assertion) { setLoggedIn(); showApp(); }
+  } catch(e) {
+    if (e.name !== 'NotAllowedError') showToastAuth('Biometrie fehlgeschlagen — bitte Passwort nutzen');
+  }
+}
+
+async function setupBiometric() {
+  try {
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'Kassenbuch Ergopraxis', id: location.hostname },
+        user: { id: new TextEncoder().encode('hilpert'), name: 'hilpert', displayName: 'Ergotherapie Hilpert' },
+        pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
+        authenticatorSelection: { userVerification: 'required', residentKey: 'preferred' },
+        timeout: 30000
+      }
+    });
+    if (cred) {
+      localStorage.setItem('kb_cred_id', uint8ToBase64(new Uint8Array(cred.rawId)));
+      showToastAuth('Fingerabdruck gespeichert!');
+      setLoggedIn(); showApp();
+    }
+  } catch(e) { showToastAuth('Biometrie nicht verfügbar'); }
+}
+
+function showToastAuth(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1A1714;color:#fff;padding:9px 18px;border-radius:99px;font-size:13px;z-index:600;font-family:sans-serif;';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+function showLoginScreen() {
+  const screen = document.getElementById('login-screen');
+  screen.style.display = 'flex';
+  const hasCred = localStorage.getItem('kb_cred_id');
+  const supported = window.PublicKeyCredential !== undefined;
+  const btn = document.getElementById('biometric-btn');
+  if (supported && hasCred) {
+    btn.style.display = 'flex';
+    setTimeout(() => doBiometric(), 600);
+  } else {
+    btn.style.display = 'none';
+  }
+  setTimeout(() => document.getElementById('login-password')?.focus(), 400);
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  const supported = window.PublicKeyCredential !== undefined;
+  const hasCred = localStorage.getItem('kb_cred_id');
+  const hasPw = localStorage.getItem('kb_pw_hash');
+  if (supported && !hasCred && hasPw) {
+    setTimeout(() => {
+      if (confirm('Fingerabdruck zum schnellen Entsperren einrichten?')) setupBiometric();
+    }, 800);
+  }
+  checkConnection();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+if (isLoggedIn()) { checkConnection(); } else { showLoginScreen(); }
+
 </script>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(26,23,20,0.5);align-items:flex-end;justify-content:center;">
+  <div style="background:#F5F3EE;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 20px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-size:15px;font-weight:600;color:#1A1714;">Eintrag bearbeiten</div>
+      <button onclick="closeEdit()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#6B6459;padding:4px;">×</button>
+    </div>
+
+    <div style="margin-bottom:11px;">
+      <label style="display:block;font-size:11px;font-weight:500;color:#6B6459;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em;font-family:monospace;">Rechnungsdatum</label>
+      <input type="date" id="edit-datum" style="width:100%;padding:9px 11px;border:1px solid #D8D3C8;border-radius:10px;font-size:14px;background:#fff;color:#1A1714;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:11px;">
+      <label style="display:block;font-size:11px;font-weight:500;color:#6B6459;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em;font-family:monospace;">Rechnungssteller</label>
+      <input type="text" id="edit-steller" style="width:100%;padding:9px 11px;border:1px solid #D8D3C8;border-radius:10px;font-size:14px;background:#fff;color:#1A1714;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:11px;">
+      <label style="display:block;font-size:11px;font-weight:500;color:#6B6459;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em;font-family:monospace;">Beschreibung</label>
+      <input type="text" id="edit-beschreibung" style="width:100%;padding:9px 11px;border:1px solid #D8D3C8;border-radius:10px;font-size:14px;background:#fff;color:#1A1714;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:11px;">
+      <label style="display:block;font-size:11px;font-weight:500;color:#6B6459;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em;font-family:monospace;">Kategorie</label>
+      <select id="edit-kategorie" style="width:100%;padding:9px 11px;border:1px solid #D8D3C8;border-radius:10px;font-size:14px;background:#fff;color:#1A1714;box-sizing:border-box;">
+        <option value="Praxis & Infrastruktur">Praxis &amp; Infrastruktur</option>
+        <option value="Software & Kommunikation">Software &amp; Kommunikation</option>
+        <option value="Material & Verbrauch">Material &amp; Verbrauch</option>
+        <option value="Versicherungen">Versicherungen</option>
+        <option value="Weiterbildung & Fachliteratur">Weiterbildung &amp; Fachliteratur</option>
+        <option value="Verbände & Gebühren">Verbände &amp; Gebühren</option>
+        <option value="Fahrkosten">Fahrkosten</option>
+        <option value="Sonstiger Geschäftsaufwand">Sonstiger Geschäftsaufwand</option>
+      </select>
+    </div>
+    <div style="margin-bottom:11px;">
+      <label style="display:block;font-size:11px;font-weight:500;color:#6B6459;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em;font-family:monospace;">Betrag CHF</label>
+      <input type="number" id="edit-betrag" step="0.05" min="0" style="width:100%;padding:9px 11px;border:1px solid #D8D3C8;border-radius:10px;font-size:14px;background:#fff;color:#1A1714;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:11px;font-weight:500;color:#6B6459;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em;font-family:monospace;">Bemerkungen</label>
+      <input type="text" id="edit-bemerkungen" placeholder="Optional" style="width:100%;padding:9px 11px;border:1px solid #D8D3C8;border-radius:10px;font-size:14px;background:#fff;color:#1A1714;box-sizing:border-box;">
+    </div>
+
+    <button onclick="saveEdit()" style="width:100%;padding:13px;background:#2D5A27;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;font-family:'DM Sans',sans-serif;">
+      <i class="ti ti-check"></i> Änderungen speichern
+    </button>
+    <button onclick="closeEdit()" style="width:100%;padding:11px;background:none;color:#6B6459;border:1px solid #D8D3C8;border-radius:10px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;">
+      Abbrechen
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
