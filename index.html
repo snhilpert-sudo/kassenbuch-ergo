@@ -1069,6 +1069,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ─── AUTH ─────────────────────────────────────────────────────────
 const SESSION_KEY = 'kb_auth_session';
+const PW_SETTING = 'app_password_hash'; // Key in Supabase settings table
 
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -1083,21 +1084,54 @@ function setLoggedIn() {
   sessionStorage.setItem(SESSION_KEY, 'authenticated');
 }
 
+// Passwort-Hash aus Supabase laden
+async function getStoredHash() {
+  try {
+    const data = await sbFetch('einstellungen?key=eq.app_password_hash&select=value');
+    return data.length > 0 ? data[0].value : null;
+  } catch(e) { return null; }
+}
+
+// Passwort-Hash in Supabase speichern
+async function setStoredHash(hash) {
+  try {
+    // Upsert: insert oder update
+    await sbFetch('einstellungen', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key: 'app_password_hash', value: hash })
+    });
+  } catch(e) { console.error('Hash speichern fehlgeschlagen:', e); }
+}
+
 async function doLogin() {
   const pw = document.getElementById('login-password').value;
   if (!pw) return;
+
+  const btn = document.querySelector('#login-form button');
+  btn.textContent = 'Wird geprüft…';
+  btn.disabled = true;
+
   const hash = await sha256(pw);
-  const stored = localStorage.getItem('kb_pw_hash');
+  const stored = await getStoredHash();
+
   if (!stored) {
-    localStorage.setItem('kb_pw_hash', hash);
-    setLoggedIn(); showApp(); return;
+    // Kein Passwort gesetzt → erstes Gerät setzt es
+    await setStoredHash(hash);
+    setLoggedIn();
+    showApp();
+    return;
   }
+
   if (hash === stored) {
-    setLoggedIn(); showApp();
+    setLoggedIn();
+    showApp();
   } else {
     document.getElementById('login-error').style.display = 'block';
     document.getElementById('login-password').value = '';
     document.getElementById('login-password').focus();
+    btn.textContent = 'Anmelden';
+    btn.disabled = false;
   }
 }
 
@@ -1135,18 +1169,18 @@ async function setupBiometric() {
     });
     if (cred) {
       localStorage.setItem('kb_cred_id', uint8ToBase64(new Uint8Array(cred.rawId)));
-      showToastAuth('Fingerabdruck gespeichert!');
+      showToastAuth('Fingerabdruck gespeichert ✓');
       setLoggedIn(); showApp();
     }
-  } catch(e) { showToastAuth('Biometrie nicht verfügbar'); }
+  } catch(e) { showToastAuth('Biometrie nicht verfügbar — nutze Passwort'); }
 }
 
 function showToastAuth(msg) {
   const t = document.createElement('div');
   t.textContent = msg;
-  t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1A1714;color:#fff;padding:9px 18px;border-radius:99px;font-size:13px;z-index:600;font-family:sans-serif;';
+  t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1A1714;color:#fff;padding:9px 18px;border-radius:99px;font-size:13px;z-index:600;font-family:sans-serif;white-space:nowrap;';
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2500);
+  setTimeout(() => t.remove(), 2800);
 }
 
 function showLoginScreen() {
@@ -1168,11 +1202,10 @@ function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   const supported = window.PublicKeyCredential !== undefined;
   const hasCred = localStorage.getItem('kb_cred_id');
-  const hasPw = localStorage.getItem('kb_pw_hash');
-  if (supported && !hasCred && hasPw) {
+  if (supported && !hasCred) {
     setTimeout(() => {
       if (confirm('Fingerabdruck zum schnellen Entsperren einrichten?')) setupBiometric();
-    }, 800);
+    }, 1000);
   }
   checkConnection();
 }
