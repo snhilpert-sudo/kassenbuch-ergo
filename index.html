@@ -865,12 +865,12 @@ Setze konfidenz auf "low" nur wenn du dir wirklich unsicher bist.`;
     console.error('KI Fehler:', e);
     fillForm({ datum: today(), datum_konfidenz:'low', rechnungssteller:'', steller_konfidenz:'low', beschreibung:'', beschreibung_konfidenz:'low', betrag:0, betrag_konfidenz:'low', bemerkungen:'', kategorie:'Sonstiger Geschäftsaufwand' });
     showToast('KI-Fehler: ' + e.message + ' — bitte manuell ausfüllen');
+  } finally {
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('progress-fill').style.width = '0%';
+    document.getElementById('form-card').style.display = 'block';
+    updateFilename();
   }
-
-  document.getElementById('progress-wrap').style.display = 'none';
-  document.getElementById('progress-fill').style.width = '0%';
-  document.getElementById('form-card').style.display = 'block';
-  updateFilename();
 }
 
 function fillForm(d) {
