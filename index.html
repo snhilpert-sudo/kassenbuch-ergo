@@ -830,22 +830,27 @@ Setze konfidenz auf "low" nur wenn du dir wirklich unsicher bist.`;
   }));
 
   try {
-    const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [...imageParts, { text: prompt }] }],
-          generationConfig: { temperature: 0.0, maxOutputTokens: 512 }
-        })
-      }
-    );
-    if (!resp.ok) {
-      const errText = await resp.text();
-      console.error('Gemini error:', resp.status, errText);
-      throw new Error('API ' + resp.status);
+    // Versuche mehrere Modelle der Reihe nach
+    const MODELS = ['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-flash-latest','gemini-1.5-flash-8b','gemini-pro-vision'];
+    let resp = null, usedModel = '';
+    for (const model of MODELS) {
+      try {
+        const r = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [...imageParts, { text: prompt }] }],
+              generationConfig: { temperature: 0.0, maxOutputTokens: 512 }
+            })
+          }
+        );
+        if (r.ok) { resp = r; usedModel = model; console.log('Gemini model OK:', model); break; }
+        console.warn('Model', model, 'returned', r.status);
+      } catch(e) { console.warn('Model', model, 'error:', e.message); }
     }
+    if (!resp) throw new Error('Kein Gemini-Modell verfügbar');
     const data = await resp.json();
     console.log('Gemini raw:', JSON.stringify(data));
     const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
