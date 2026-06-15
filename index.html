@@ -709,13 +709,32 @@ function handleFile(e) {
   } else {
     const reader = new FileReader();
     reader.onload = ev => {
-      pages.push({ dataUrl: ev.target.result, mime: file.type || 'image/jpeg' });
-      renderStrip();
-      if (pages.length === 1) {
-        document.getElementById('scan-hint').style.display = 'none';
-        document.getElementById('upload-zone').style.display = 'none';
-      }
-      analyzeImages();
+      // Bildqualität verbessern vor dem Senden
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // Max 1600px für gute Qualität ohne zu gross zu werden
+        const maxDim = 1600;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        // Helligkeit/Kontrast leicht erhöhen
+        ctx.filter = 'contrast(1.15) brightness(1.05)';
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        pages.push({ dataUrl, mime: 'image/jpeg' });
+        renderStrip();
+        if (pages.length === 1) {
+          document.getElementById('scan-hint').style.display = 'none';
+          document.getElementById('upload-zone').style.display = 'none';
+        }
+        analyzeImages();
+      };
+      img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -794,15 +813,17 @@ async function analyzeImages() {
   document.getElementById('form-card').style.display = 'none';
   animateProgress();
 
-  const prompt = `Analysiere diese Schweizer Rechnung und extrahiere die Daten als JSON.
-Rechnungssteller = Absender/Lieferant (meist oben links).
-Betrag = Endbetrag/Total inkl. MwSt.
-Datum = Rechnungsdatum (nicht Zahlungsdatum).
-Kategorie = eine aus: ${CATS.join(', ')}.
-Konfidenz = "high" wenn klar erkennbar, sonst "low".
+  const prompt = `Du siehst eine Schweizer Rechnung. Lies folgende Felder aus:
+1. datum: Rechnungsdatum im Format YYYY-MM-DD (z.B. 2026-04-29)
+2. rechnungssteller: Firmenname des Absenders (oben links)
+3. beschreibung: Was wurde gekauft/welche Leistung (kurz, max 60 Zeichen)
+4. betrag: Der Totalbetrag in CHF als Zahl (z.B. 324.30)
+5. kategorie: Wähle die passendste: ${CATS.join(' / ')}
 
-Antworte AUSSCHLIESSLICH mit diesem JSON, ohne Markdown, ohne Erklaerung:
-{"datum":"${today()}","datum_konfidenz":"low","rechnungssteller":"","steller_konfidenz":"low","beschreibung":"","beschreibung_konfidenz":"low","betrag":0,"betrag_konfidenz":"low","bemerkungen":"","kategorie":"Sonstiger Geschaeftsaufwand"}`;
+Antworte NUR mit folgendem JSON (keine Erklärung, kein Markdown):
+{"datum":"","datum_konfidenz":"high","rechnungssteller":"","steller_konfidenz":"high","beschreibung":"","beschreibung_konfidenz":"high","betrag":0,"betrag_konfidenz":"high","bemerkungen":"","kategorie":""}
+
+Setze konfidenz auf "low" nur wenn du dir wirklich unsicher bist.`;
 
   const imageParts = pages.map(p => ({
     inlineData: { mimeType: p.mime, data: p.dataUrl.split(',')[1] }
@@ -810,7 +831,7 @@ Antworte AUSSCHLIESSLICH mit diesem JSON, ohne Markdown, ohne Erklaerung:
 
   try {
     const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
