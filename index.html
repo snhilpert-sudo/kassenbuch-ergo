@@ -813,17 +813,11 @@ async function analyzeImages() {
   document.getElementById('form-card').style.display = 'none';
   animateProgress();
 
-  const prompt = `Du siehst eine Schweizer Rechnung. Lies folgende Felder aus:
-1. datum: Rechnungsdatum im Format YYYY-MM-DD (z.B. 2026-04-29)
-2. rechnungssteller: Firmenname des Absenders (oben links)
-3. beschreibung: Was wurde gekauft/welche Leistung (kurz, max 60 Zeichen)
-4. betrag: Der Totalbetrag in CHF als Zahl (z.B. 324.30)
-5. kategorie: Wähle die passendste: ${CATS.join(' / ')}
+  const prompt = `Schweizer Rechnung analysieren. Antworte NUR mit diesem JSON:
+{"datum":"YYYY-MM-DD","dc":"high","rechnungssteller":"Name","sc":"high","beschreibung":"Leistung","bc":"high","betrag":0.00,"ac":"high","kategorie":"Kategorie"}
 
-Antworte NUR mit folgendem JSON (keine Erklärung, kein Markdown):
-{"datum":"","datum_konfidenz":"high","rechnungssteller":"","steller_konfidenz":"high","beschreibung":"","beschreibung_konfidenz":"high","betrag":0,"betrag_konfidenz":"high","bemerkungen":"","kategorie":""}
-
-Setze konfidenz auf "low" nur wenn du dir wirklich unsicher bist.`;
+Felder: datum=Rechnungsdatum, rechnungssteller=Absender oben links, beschreibung=Leistung/Produkt (max 50 Zeichen), betrag=Totalbetrag CHF inkl MwSt, kategorie aus: ${CATS.join('/')}.
+Konfidenz (dc/sc/bc/ac): high=klar erkennbar, low=unsicher. Kein Markdown, keine Erklärung.`;
 
   const imageParts = pages.map(p => ({
     inlineData: { mimeType: p.mime, data: p.dataUrl.split(',')[1] }
@@ -842,7 +836,7 @@ Setze konfidenz auf "low" nur wenn du dir wirklich unsicher bist.`;
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ parts: [...imageParts, { text: prompt }] }],
-              generationConfig: { temperature: 0.0, maxOutputTokens: 512 }
+              generationConfig: { temperature: 0.0, maxOutputTokens: 1024 }
             })
           }
         );
@@ -859,7 +853,12 @@ Setze konfidenz auf "low" nur wenn du dir wirklich unsicher bist.`;
     // Robust JSON extraction — find first { ... }
     const match = txt.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('Kein JSON gefunden: ' + txt);
-    const parsed = JSON.parse(match[0]);
+    let parsed = JSON.parse(match[0]);
+    // Handle both short and long confidence key names
+    parsed.datum_konfidenz = parsed.datum_konfidenz || parsed.dc || 'low';
+    parsed.steller_konfidenz = parsed.steller_konfidenz || parsed.sc || 'low';
+    parsed.beschreibung_konfidenz = parsed.beschreibung_konfidenz || parsed.bc || 'low';
+    parsed.betrag_konfidenz = parsed.betrag_konfidenz || parsed.ac || 'low';
     fillForm(parsed);
   } catch(e) {
     console.error('KI Fehler:', e);
