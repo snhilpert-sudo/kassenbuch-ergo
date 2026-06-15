@@ -444,6 +444,7 @@ window.addEventListener('appinstalled', () => {
 
     <div class="form-card" id="form-card">
       <div class="form-card-title"><i class="ti ti-sparkles"></i> Erkannte Rechnungsdaten</div>
+      <div id="ki-error-box" style="display:none;background:#FDEAEA;color:#B83232;padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:12px;word-break:break-all;font-family:monospace;"></div>
 
       <div class="field">
         <label>Rechnungsdatum <span id="conf-datum"></span></label>
@@ -813,11 +814,8 @@ async function analyzeImages() {
   document.getElementById('form-card').style.display = 'none';
   animateProgress();
 
-  const prompt = `Schweizer Rechnung analysieren. Antworte NUR mit diesem JSON:
-{"datum":"YYYY-MM-DD","dc":"high","rechnungssteller":"Name","sc":"high","beschreibung":"Leistung","bc":"high","betrag":0.00,"ac":"high","kategorie":"Kategorie"}
-
-Felder: datum=Rechnungsdatum, rechnungssteller=Absender oben links, beschreibung=Leistung/Produkt (max 50 Zeichen), betrag=Totalbetrag CHF inkl MwSt, kategorie aus: ${CATS.join('/')}.
-Konfidenz (dc/sc/bc/ac): high=klar erkennbar, low=unsicher. Kein Markdown, keine Erklärung.`;
+  const prompt = `Extract from this Swiss invoice. Reply ONLY with JSON, no other text:
+{"datum":"YYYY-MM-DD","dc":"high","rechnungssteller":"sender name","sc":"high","beschreibung":"service description","bc":"high","betrag":0.00,"ac":"high","kategorie":"best match from: ${CATS.join('/')}"}`;
 
   const imageParts = pages.map(p => ({
     inlineData: { mimeType: p.mime, data: p.dataUrl.split(',')[1] }
@@ -836,7 +834,7 @@ Konfidenz (dc/sc/bc/ac): high=klar erkennbar, low=unsicher. Kein Markdown, keine
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ parts: [...imageParts, { text: prompt }] }],
-              generationConfig: { temperature: 0.0, maxOutputTokens: 1024 }
+              generationConfig: { temperature: 0.0, maxOutputTokens: 8192 }, thinkingConfig: { thinkingBudget: 0 }
             })
           }
         );
@@ -863,7 +861,12 @@ Konfidenz (dc/sc/bc/ac): high=klar erkennbar, low=unsicher. Kein Markdown, keine
   } catch(e) {
     console.error('KI Fehler:', e);
     fillForm({ datum: today(), datum_konfidenz:'low', rechnungssteller:'', steller_konfidenz:'low', beschreibung:'', beschreibung_konfidenz:'low', betrag:0, betrag_konfidenz:'low', bemerkungen:'', kategorie:'Sonstiger Geschäftsaufwand' });
-    showToast('KI-Fehler: ' + e.message + ' — bitte manuell ausfüllen');
+    // Show permanent error box with full message
+    const errBox = document.getElementById('ki-error-box');
+    if (errBox) {
+      errBox.textContent = 'KI-Fehler: ' + e.message;
+      errBox.style.display = 'block';
+    }
   } finally {
     document.getElementById('progress-wrap').style.display = 'none';
     document.getElementById('progress-fill').style.width = '0%';
@@ -992,6 +995,8 @@ function resetScan() {
   document.getElementById('scan-hint').style.display = 'block';
   document.getElementById('file-input').value = '';
   document.getElementById('filename-display').textContent = '—';
+  const errBox = document.getElementById('ki-error-box');
+  if (errBox) { errBox.style.display = 'none'; errBox.textContent = ''; }
 }
 
 // ─── LIST ────────────────────────────────────────────────────────
