@@ -429,10 +429,10 @@ window.addEventListener('appinstalled', () => {
 
     <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
       <i class="ti ti-camera-plus upload-zone-icon"></i>
-      <div class="upload-zone-title">Beleg fotografieren</div>
-      <div class="upload-zone-sub">Tippen um Kamera zu öffnen<br>Mehrere Seiten möglich</div>
+      <div class="upload-zone-title">Beleg erfassen</div>
+      <div class="upload-zone-sub">Foto aufnehmen, Bild oder PDF wählen<br>Mehrere Seiten möglich</div>
     </div>
-    <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)">
+    <input type="file" id="file-input" accept="image/*,application/pdf" onchange="handleFile(event)">
 
     <div id="pages-strip" class="pages-strip" style="display:none"></div>
     <div id="pages-meta" class="pages-meta" style="display:none"></div>
@@ -703,17 +703,69 @@ function handleFile(e) {
   const file = e.target.files[0];
   if (!file) return;
   e.target.value = '';
-  const reader = new FileReader();
-  reader.onload = ev => {
-    pages.push({ dataUrl: ev.target.result, mime: file.type || 'image/jpeg' });
-    renderStrip();
-    if (pages.length === 1) {
-      document.getElementById('scan-hint').style.display = 'none';
-      document.getElementById('upload-zone').style.display = 'none';
+
+  if (file.type === 'application/pdf') {
+    handlePdf(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      pages.push({ dataUrl: ev.target.result, mime: file.type || 'image/jpeg' });
+      renderStrip();
+      if (pages.length === 1) {
+        document.getElementById('scan-hint').style.display = 'none';
+        document.getElementById('upload-zone').style.display = 'none';
+      }
+      analyzeImages();
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function handlePdf(file) {
+  showToastPdf('PDF wird verarbeitet…');
+  try {
+    // Load PDF.js dynamically
+    if (!window.pdfjsLib) {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const numPages = Math.min(pdfDoc.numPages, 5); // max 5 Seiten
+
+    document.getElementById('scan-hint').style.display = 'none';
+    document.getElementById('upload-zone').style.display = 'none';
+
+    for (let i = 1; i <= numPages; i++) {
+      const page = await pdfDoc.getPage(i);
+      const viewport = page.getViewport({ scale: 2.0 }); // hohe Auflösung
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      pages.push({ dataUrl, mime: 'image/jpeg' });
+    }
+
+    renderStrip();
     analyzeImages();
-  };
-  reader.readAsDataURL(file);
+  } catch(err) {
+    showToast('PDF-Fehler: ' + err.message);
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function showToastPdf(msg) {
+  showToast(msg);
 }
 
 function renderStrip() {
@@ -742,21 +794,15 @@ async function analyzeImages() {
   document.getElementById('form-card').style.display = 'none';
   animateProgress();
 
-  const prompt = `Du bist ein präziser Schweizer Buchhaltungsassistent für eine selbstständige Ergotherapeutin. Analysiere diese Rechnung (${pages.length} Seite${pages.length > 1 ? 'n' : ''}).
+  const prompt = `Analysiere diese Schweizer Rechnung und extrahiere die Daten als JSON.
+Rechnungssteller = Absender/Lieferant (meist oben links).
+Betrag = Endbetrag/Total inkl. MwSt.
+Datum = Rechnungsdatum (nicht Zahlungsdatum).
+Kategorie = eine aus: ${CATS.join(', ')}.
+Konfidenz = "high" wenn klar erkennbar, sonst "low".
 
-WICHTIGE HINWEISE:
-- datum: Das RECHNUNGSDATUM (ausgestellt am). Format YYYY-MM-DD. Falls unklar: "${today()}".
-- rechnungssteller: ABSENDER/LIEFERANT (oben links: Firmenname). NICHT der Empfänger.
-- beschreibung: Konkrete Dienstleistung/Produkt. Kurz, präzise (max. 60 Zeichen).
-- betrag: TOTALBETRAG inkl. MwSt (Zeile "Total", "Rechnungsbetrag", "Zu bezahlen"). Nur Zahl.
-- betrag_konfidenz: "high" wenn Total eindeutig erkennbar, sonst "low".
-- datum_konfidenz: "high" wenn Rechnungsdatum klar, sonst "low".
-- steller_konfidenz: "high" wenn Absender klar, sonst "low".
-- beschreibung_konfidenz: "high" wenn Leistung klar, sonst "low".
-- kategorie: Passendste aus: ${CATS.join(', ')}.
-
-Antworte NUR mit JSON (kein Markdown, keine Erklärung):
-{"datum":"","datum_konfidenz":"","rechnungssteller":"","steller_konfidenz":"","beschreibung":"","beschreibung_konfidenz":"","betrag":0,"betrag_konfidenz":"","bemerkungen":"","kategorie":""}`;
+Antworte AUSSCHLIESSLICH mit diesem JSON, ohne Markdown, ohne Erklaerung:
+{"datum":"${today()}","datum_konfidenz":"low","rechnungssteller":"","steller_konfidenz":"low","beschreibung":"","beschreibung_konfidenz":"low","betrag":0,"betrag_konfidenz":"low","bemerkungen":"","kategorie":"Sonstiger Geschaeftsaufwand"}`;
 
   const imageParts = pages.map(p => ({
     inlineData: { mimeType: p.mime, data: p.dataUrl.split(',')[1] }
@@ -764,22 +810,35 @@ Antworte NUR mit JSON (kein Markdown, keine Erklärung):
 
   try {
     const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [...imageParts, { text: prompt }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+          generationConfig: { temperature: 0.0, maxOutputTokens: 512 }
         })
       }
     );
+    if (!resp.ok) {
+      const errText = await resp.text();
+      console.error('Gemini error:', resp.status, errText);
+      throw new Error('API ' + resp.status);
+    }
     const data = await resp.json();
-    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    fillForm(JSON.parse(txt.replace(/```json|```/g,'').trim()));
+    console.log('Gemini raw:', JSON.stringify(data));
+    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    console.log('Gemini text:', txt);
+    if (!txt) throw new Error('Leere Antwort');
+    // Robust JSON extraction — find first { ... }
+    const match = txt.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Kein JSON gefunden: ' + txt);
+    const parsed = JSON.parse(match[0]);
+    fillForm(parsed);
   } catch(e) {
+    console.error('KI Fehler:', e);
     fillForm({ datum: today(), datum_konfidenz:'low', rechnungssteller:'', steller_konfidenz:'low', beschreibung:'', beschreibung_konfidenz:'low', betrag:0, betrag_konfidenz:'low', bemerkungen:'', kategorie:'Sonstiger Geschäftsaufwand' });
-    showToast('KI-Fehler — Felder manuell ausfüllen');
+    showToast('KI-Fehler: ' + e.message + ' — bitte manuell ausfüllen');
   }
 
   document.getElementById('progress-wrap').style.display = 'none';
