@@ -831,7 +831,7 @@ Setze konfidenz auf "low" nur wenn du dir wirklich unsicher bist.`;
 
   try {
     // Versuche mehrere Modelle der Reihe nach
-    const MODELS = ['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-flash-latest','gemini-1.5-flash-8b','gemini-pro-vision'];
+    const MODELS = ['gemini-3-flash-preview','gemini-2.5-flash-preview-05-20','gemini-2.5-flash','gemini-2.0-flash'];
     let resp = null, usedModel = '';
     for (const model of MODELS) {
       try {
