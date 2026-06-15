@@ -559,7 +559,7 @@ window.addEventListener('appinstalled', () => {
 // ─── KONFIGURATION ───────────────────────────────────────────────
 const SUPABASE_URL = 'https://zomsdllwwsbhjldtbhpq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvbXNkbGx3d3NiaGpsZHRiaHBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTc5NDIsImV4cCI6MjA5NjA3Mzk0Mn0.ejRZd1bpNP_EGapARgps7r9DUeJzeuK5yW5m_k640b4';
-const GEMINI_KEY = 'AQ.Ab8RN6KI7541QpcRIAKXUhYFuSebakD9ExENZiLk5FWOP8l8mQ';
+const GEMINI_KEY = 'AQ.Ab8RN6LFIw6EYLkjKTjfB_yIbcZ1PuESrShD6oTyhQSQYvtmpw';
 
 const CATS = ['Praxis & Infrastruktur','Software & Kommunikation','Material & Verbrauch','Versicherungen','Weiterbildung & Fachliteratur','Verbände & Gebühren','Fahrkosten','Sonstiger Geschäftsaufwand'];
 const COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#888780','#378ADD','#639922','#BA7517'];
@@ -823,7 +823,7 @@ async function analyzeImages() {
 
   try {
     // Versuche mehrere Modelle der Reihe nach
-    const MODELS = ['gemini-3-flash-preview','gemini-2.5-flash-preview-05-20','gemini-2.5-flash','gemini-2.0-flash'];
+    const MODELS = ['gemini-2.5-flash','gemini-2.5-flash-preview-05-20','gemini-3.0-flash','gemini-2.0-flash','gemini-1.5-flash'];
     let resp = null, usedModel = '';
     for (const model of MODELS) {
       try {
@@ -834,7 +834,7 @@ async function analyzeImages() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ parts: [...imageParts, { text: prompt }] }],
-              generationConfig: { temperature: 0.0, maxOutputTokens: 8192 }, thinkingConfig: { thinkingBudget: 0 }
+              generationConfig: { temperature: 0.0, maxOutputTokens: 2048 }
             })
           }
         );
