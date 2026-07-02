@@ -585,9 +585,14 @@ window.addEventListener('appinstalled', () => {
           <span id="fahrt-abzug-15" style="font-size:14px;font-weight:700;color:#A8D5A2;font-family:'DM Mono',monospace;"></span>
         </div>
       </div>
-      <button onclick="exportFahrtenbuchCSV()" style="margin-top:14px;width:100%;padding:11px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">
-        <i class="ti ti-table-export"></i> CSV exportieren
-      </button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+        <button onclick="exportFahrtenbuchCSV()" style="padding:11px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">
+          <i class="ti ti-table-export"></i> CSV
+        </button>
+        <button onclick="exportFahrtenbuchPDF()" style="padding:11px;background:rgba(255,255,255,0.25);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">
+          <i class="ti ti-file-type-pdf"></i> PDF
+        </button>
+      </div>
     </div>
 
     <!-- Fahrten-Liste -->
@@ -1489,9 +1494,143 @@ function exportFahrtenbuchCSV() {
     'KK-Vergütung CHF 0.60/km;' + (totalKm * 0.60).toFixed(2),
     'Netto-Abzug CHF 0.15/km;' + (totalKm * 0.15).toFixed(2)
   ];
-  const csv = [header, ...rows, ...footer].join('
-');
+  const csv = [header, ...rows, ...footer].join('\n');
   download('Fahrtenbuch_' + year + '.csv', new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+}
+
+
+async function exportFahrtenbuchPDF() {
+  const sel = document.getElementById('year-select-fahrt');
+  const year = sel ? sel.value : new Date().getFullYear().toString();
+  const filtered = fahrten.filter(f => (f.datum||'').startsWith(year)).slice().reverse();
+  if (!filtered.length) { showToast('Keine Fahrten für ' + year); return; }
+
+  const totalKm = filtered.reduce((s, f) => s + Number(f.km || 0), 0);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const marginL = 20, marginR = 20, pageW = 210, contentW = pageW - marginL - marginR;
+  let y = 20;
+
+  // ── Header ──
+  pdf.setFillColor(45, 90, 39);
+  pdf.rect(0, 0, 210, 38, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(18);
+  pdf.text('Fahrtenbuch ' + year, marginL, 16);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  pdf.text('Ergotherapie Hilpert · Geschäftliche Fahrten', marginL, 24);
+  pdf.text('Erstellt: ' + new Date().toLocaleDateString('de-CH'), marginL, 31);
+  y = 50;
+
+  // ── Tabelle Header ──
+  pdf.setTextColor(26, 23, 20);
+  pdf.setFillColor(237, 234, 226);
+  pdf.rect(marginL, y - 5, contentW, 8, 'F');
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  pdf.text('Datum', marginL + 2, y);
+  pdf.text('km', marginL + 40, y, { align: 'right' });
+  pdf.text('Bemerkung', marginL + 46, y);
+  y += 6;
+
+  // ── Zeilen ──
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  let rowBg = false;
+  for (const f of filtered) {
+    if (y > 265) {
+      pdf.addPage();
+      y = 20;
+    }
+    if (rowBg) {
+      pdf.setFillColor(245, 243, 238);
+      pdf.rect(marginL, y - 4, contentW, 7, 'F');
+    }
+    rowBg = !rowBg;
+    pdf.setTextColor(26, 23, 20);
+    const d = f.datum ? new Date(f.datum + 'T00:00:00').toLocaleDateString('de-CH', {day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+    pdf.text(d, marginL + 2, y);
+    pdf.text(Number(f.km).toFixed(1), marginL + 40, y, { align: 'right' });
+    if (f.bemerkungen) {
+      const bem = f.bemerkungen.length > 55 ? f.bemerkungen.substring(0, 52) + '…' : f.bemerkungen;
+      pdf.text(bem, marginL + 46, y);
+    }
+    y += 7;
+  }
+
+  // ── Trennlinie ──
+  y += 4;
+  pdf.setDrawColor(200, 194, 180);
+  pdf.line(marginL, y, marginL + contentW, y);
+  y += 8;
+
+  // ── Auswertung ──
+  if (y > 250) { pdf.addPage(); y = 20; }
+  pdf.setFillColor(45, 90, 39);
+  pdf.rect(marginL, y - 5, contentW, 52, 'F');
+  pdf.setTextColor(255, 255, 255);
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.text('Jahresauswertung', marginL + 4, y + 1);
+  y += 9;
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+
+  const rows2 = [
+    ['Total Fahrten', filtered.length + ' Fahrten'],
+    ['Total km', totalKm.toFixed(1) + ' km'],
+    ['', ''],
+    ['Steuerabzug  (CHF 0.75 / km)', 'CHF ' + (totalKm * 0.75).toFixed(2)],
+    ['KK-Vergütung  (CHF 0.60 / km)', 'CHF ' + (totalKm * 0.60).toFixed(2)],
+  ];
+  for (const [label, val] of rows2) {
+    if (!label) { y += 2; continue; }
+    pdf.setTextColor(200, 230, 200);
+    pdf.text(label, marginL + 4, y);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(val, marginL + contentW - 2, y, { align: 'right' });
+    y += 7;
+  }
+
+  // Netto hervorgehoben
+  pdf.setFillColor(255, 255, 255, 0.15);
+  pdf.setDrawColor(168, 213, 162);
+  pdf.setLineWidth(0.5);
+  pdf.line(marginL + 4, y, marginL + contentW - 4, y);
+  y += 5;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(11);
+  pdf.setTextColor(168, 213, 162);
+  pdf.text('Netto-Abzug  (CHF 0.15 / km)', marginL + 4, y);
+  pdf.text('CHF ' + (totalKm * 0.15).toFixed(2), marginL + contentW - 2, y, { align: 'right' });
+
+  // ── Footer ──
+  const pageCount = pdf.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    pdf.setPage(i);
+    pdf.setTextColor(156, 144, 133);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.text('Fahrtenbuch ' + year + ' · Ergotherapie Hilpert', marginL, 290);
+    pdf.text('Seite ' + i + ' / ' + pageCount, 210 - marginR, 290, { align: 'right' });
+  }
+
+  const filename = 'Fahrtenbuch_' + year + '.pdf';
+  const blob = pdf.output('blob');
+  const file = new File([blob], filename, { type: 'application/pdf' });
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    await navigator.share({ files: [file], title: filename });
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+  showToast('PDF erstellt ✓');
 }
 
 </script>
