@@ -623,7 +623,9 @@ window.addEventListener('appinstalled', () => {
 // ─── KONFIGURATION ───────────────────────────────────────────────
 const SUPABASE_URL = 'https://zomsdllwwsbhjldtbhpq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvbXNkbGx3d3NiaGpsZHRiaHBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTc5NDIsImV4cCI6MjA5NjA3Mzk0Mn0.ejRZd1bpNP_EGapARgps7r9DUeJzeuK5yW5m_k640b4';
-const GEMINI_KEY = 'AQ.Ab8RN6LFIw6EYLkjKTjfB_yIbcZ1PuESrShD6oTyhQSQYvtmpw';
+// Der Gemini-Key liegt bewusst NICHT mehr hier im Code — er ist als Secret
+// in der Supabase Edge Function "gemini-proxy" hinterlegt und verlässt Supabase nie.
+const GEMINI_PROXY_URL = SUPABASE_URL + '/functions/v1/gemini-proxy';
 
 const CATS = ['Praxis & Infrastruktur','Software & Kommunikation','Material & Verbrauch','Versicherungen','Weiterbildung & Fachliteratur','Verbände & Gebühren','Fahrkosten','Sonstiger Geschäftsaufwand'];
 const COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#888780','#378ADD','#639922','#BA7517'];
@@ -888,17 +890,23 @@ async function analyzeImages() {
   }));
 
   try {
-    // Versuche mehrere Modelle der Reihe nach
+    // Versuche mehrere Modelle der Reihe nach — der Aufruf läuft über die eigene
+    // Supabase Edge Function, die den Gemini-Key sicher serverseitig anhängt.
     const MODELS = ['gemini-2.5-flash','gemini-2.5-flash-preview-05-20','gemini-3.0-flash','gemini-2.0-flash','gemini-1.5-flash'];
     let resp = null, usedModel = '';
     for (const model of MODELS) {
       try {
         const r = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`,
+          GEMINI_PROXY_URL,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'apikey': SUPABASE_KEY
+            },
             body: JSON.stringify({
+              model,
               contents: [{ parts: [...imageParts, { text: prompt }] }],
               generationConfig: { temperature: 0.0, maxOutputTokens: 2048 }
             })
