@@ -892,7 +892,11 @@ async function analyzeImages() {
   try {
     // Versuche mehrere Modelle der Reihe nach — der Aufruf läuft über die eigene
     // Supabase Edge Function, die den Gemini-Key sicher serverseitig anhängt.
-    const MODELS = ['gemini-2.5-flash','gemini-2.5-flash-preview-05-20','gemini-3.0-flash','gemini-2.0-flash','gemini-1.5-flash'];
+    // Hinweis: Google sperrt die älteren 2.x/1.5-Modelle mittlerweile für neu
+    // erstellte API-Keys (nur Keys mit bestehender Nutzungshistorie dürfen sie
+    // noch aufrufen) — daher hier die aktuelle Modell-Generation, die mit dem
+    // neuen Scan-Key funktioniert.
+    const MODELS = ['gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash','gemini-3.5-flash-lite','gemini-3.1-flash-lite'];
     let resp = null, usedModel = '';
     for (const model of MODELS) {
       try {
