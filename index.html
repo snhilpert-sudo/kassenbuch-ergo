@@ -153,6 +153,24 @@ body {
 .upload-zone-sub { font-size: 13px; color: var(--text3); }
 #file-input { display: none; }
 
+/* ── Zuschnitt-Editor (Scanic) ── */
+#crop-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: #000; flex-direction: column;
+}
+#crop-overlay.open { display: flex; }
+#crop-topbar {
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 14px;
+  color: #fff; font-size: 15px; font-weight: 600;
+  text-align: center; background: #14120f; border-bottom: 1px solid #2a2822;
+  flex-shrink: 0;
+}
+#crop-topbar small { display: block; font-size: 12px; font-weight: 400; color: #9c9085; margin-top: 2px; }
+#crop-host {
+  flex: 1; position: relative; overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* PAGES STRIP */
 .pages-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .page-thumb {
@@ -434,6 +452,15 @@ window.addEventListener('appinstalled', () => {
     </div>
     <input type="file" id="file-input" accept="image/*,application/pdf" onchange="handleFile(event)">
 
+    <!-- Zuschnitt-Editor: erscheint nach jedem Foto (nicht bei PDF-Uploads), Ecken sind per Finger verschiebbar -->
+    <div id="crop-overlay">
+      <div id="crop-topbar">
+        <span>Ecken anpassen</span>
+        <small>Ziehe die Punkte auf die Ränder des Dokuments</small>
+      </div>
+      <div id="crop-host"></div>
+    </div>
+
     <div id="pages-strip" class="pages-strip" style="display:none"></div>
     <div id="pages-meta" class="pages-meta" style="display:none"></div>
 
@@ -627,7 +654,15 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // in der Supabase Edge Function "gemini-proxy" hinterlegt und verlässt Supabase nie.
 const GEMINI_PROXY_URL = SUPABASE_URL + '/functions/v1/gemini-proxy';
 
-const CATS = ['Praxis & Infrastruktur','Software & Kommunikation','Material & Verbrauch','Versicherungen','Weiterbildung & Fachliteratur','Verbände & Gebühren','Fahrkosten','Sonstiger Geschäftsaufwand'];
+// ── Scanic (automatischer Rand-/Ecken-Zuschnitt bei Fotos) ───────────────
+// Wird im Hintergrund geladen, sobald die Seite fertig ist, damit beim ersten
+// Foto keine zusätzliche Wartezeit durch den Bibliotheks-Download entsteht.
+// Version bewusst fixiert (1.6.0), damit ein zukünftiges Update der Bibliothek
+// nicht ungefragt das Verhalten dieser Seite verändert. Identisch zu DokScan.
+const scanicReady = import('https://cdn.jsdelivr.net/npm/scanic@1.6.0/dist/scanic.js')
+  .catch(e => { console.warn('Scanic konnte nicht geladen werden — Zuschnitt wird übersprungen:', e); return null; });
+
+const CATS =['Praxis & Infrastruktur','Software & Kommunikation','Material & Verbrauch','Versicherungen','Weiterbildung & Fachliteratur','Verbände & Gebühren','Fahrkosten','Sonstiger Geschäftsaufwand'];
 const COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#888780','#378ADD','#639922','#BA7517'];
 
 // ─── STATE ───────────────────────────────────────────────────────
@@ -768,45 +803,107 @@ function switchTab(tab) {
 }
 
 // ─── FILE HANDLING ───────────────────────────────────────────────
-function handleFile(e) {
+async function handleFile(e) {
   const file = e.target.files[0];
   if (!file) return;
   e.target.value = '';
 
   if (file.type === 'application/pdf') {
     handlePdf(file);
-  } else {
+    return;
+  }
+
+  // Bildqualität verbessern vor dem Senden
+  const img = await fileToImage(file);
+  const cropped = await cropInteractive(img); // Canvas (zugeschnitten) oder null (Original übernehmen)
+  const dataUrl = resizeAndEnhance(cropped || img);
+  pages.push({ dataUrl, mime: 'image/jpeg' });
+  renderStrip();
+  if (pages.length === 1) {
+    document.getElementById('scan-hint').style.display = 'none';
+    document.getElementById('upload-zone').style.display = 'none';
+  }
+  analyzeImages();
+}
+
+// Datei -> geladenes <img> (für Zuschnitt-Erkennung und Weiterverarbeitung)
+function fileToImage(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
+    reader.onerror = reject;
     reader.onload = ev => {
-      // Bildqualität verbessern vor dem Senden
       const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        // Max 1600px für gute Qualität ohne zu gross zu werden
-        const maxDim = 1600;
-        let w = img.width, h = img.height;
-        if (w > maxDim || h > maxDim) {
-          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-          else { w = Math.round(w * maxDim / h); h = maxDim; }
-        }
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        // Helligkeit/Kontrast leicht erhöhen
-        ctx.filter = 'contrast(1.15) brightness(1.05)';
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-        pages.push({ dataUrl, mime: 'image/jpeg' });
-        renderStrip();
-        if (pages.length === 1) {
-          document.getElementById('scan-hint').style.display = 'none';
-          document.getElementById('upload-zone').style.display = 'none';
-        }
-        analyzeImages();
-      };
+      img.onerror = reject;
+      img.onload = () => resolve(img);
       img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
+  });
+}
+
+// Max 1600px für gute Qualität ohne zu gross zu werden, Helligkeit/Kontrast
+// leicht erhöhen. Akzeptiert sowohl ein <img> (unbeschnitten) als auch ein
+// <canvas> (bereits per Zuschnitt-Editor entzerrt/zugeschnitten).
+function resizeAndEnhance(source) {
+  const canvas = document.createElement('canvas');
+  const maxDim = 1600;
+  let w = source.naturalWidth || source.width, h = source.naturalHeight || source.height;
+  if (w > maxDim || h > maxDim) {
+    if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+    else { w = Math.round(w * maxDim / h); h = maxDim; }
   }
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.filter = 'contrast(1.15) brightness(1.05)';
+  ctx.drawImage(source, 0, 0, w, h);
+  return canvas.toDataURL('image/jpeg', 0.92);
+}
+
+// Zuschnitt-Editor: erkennt die Dokumentkanten automatisch, zeigt sie zum
+// Nachjustieren an und liefert nach Bestätigung das zugeschnittene Bild.
+// Gibt null zurück, wenn der Nutzer abbricht oder die Bibliothek/Erkennung
+// nicht funktioniert — dann wird einfach das Originalfoto unbeschnitten
+// weiterverwendet, die App bleibt also in jedem Fall benutzbar. Identisch
+// zu DokScan.
+function cropInteractive(img) {
+  return new Promise(async resolve => {
+    const scanic = await scanicReady;
+    if (!scanic) { resolve(null); return; }
+
+    let corners = null;
+    try {
+      const detection = await scanic.scanDocument(img, { mode: 'detect' });
+      if (detection.success && detection.corners) corners = detection.corners;
+    } catch (e) { console.warn('Kantenerkennung fehlgeschlagen:', e); }
+
+    const overlay = document.getElementById('crop-overlay');
+    const host = document.getElementById('crop-host');
+    overlay.classList.add('open');
+    host.innerHTML = '';
+
+    let editor;
+    const finish = out => {
+      editor.destroy();
+      overlay.classList.remove('open');
+      resolve(out);
+    };
+
+    editor = scanic.createCornerEditor({
+      container: host,
+      image: img,
+      corners: corners || undefined,
+      onConfirm: async finalCorners => {
+        try {
+          const extracted = await scanic.extractDocument(img, finalCorners, { output: 'canvas' });
+          finish(extracted.success ? extracted.output : null);
+        } catch (e) {
+          console.warn('Zuschnitt fehlgeschlagen, verwende Original:', e);
+          finish(null);
+        }
+      },
+      onCancel: () => finish(null)
+    });
+  });
 }
 
 async function handlePdf(file) {
